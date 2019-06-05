@@ -93,6 +93,5 @@ sys_uptime(void)
 int
 sys_invoked_syscalls(void)
 {
-  invoked_syscalls();
-  return 22;
+  return invoked_syscalls();
 }
