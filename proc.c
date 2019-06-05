@@ -532,3 +532,11 @@ procdump(void)
     cprintf("\n");
   }
 }
+
+
+int
+invoked_syscalls(void)
+{
+  cprintf("invoked_syscalls called!\n");
+  return 22;
+}
