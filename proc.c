@@ -568,12 +568,12 @@ procdump(void)
 
 void print_time(int i)
 {
-  cprintf("%d:", system_call_table.sinfo[i].date.year);
-  cprintf(" - %d", system_call_table.sinfo[i].date.month);
-  cprintf(" - %d", system_call_table.sinfo[i].date.day);
-  cprintf(" - %d",system_call_table.sinfo[i].date.hour);
-  cprintf(" - %d",system_call_table.sinfo[i].date.minute);
-  cprintf(" - %d",system_call_table.sinfo[i].date.second);
+  cprintf("%d", system_call_table.sinfo[i].date.year);
+  cprintf("-%d", system_call_table.sinfo[i].date.month);
+  cprintf("-%d", system_call_table.sinfo[i].date.day);
+  cprintf("  %d",system_call_table.sinfo[i].date.hour);
+  cprintf(":%d",system_call_table.sinfo[i].date.minute);
+  cprintf(":%d",system_call_table.sinfo[i].date.second);
 }
 
 
@@ -589,7 +589,7 @@ invoked_syscalls(int pid)
     {
       if(pid==system_call_table.sinfo[i].pid)
       {
-        cprintf("pid = %d,\tname: %s\ttime: ",
+        cprintf("pid = %d\t%s\t",
           system_call_table.sinfo[i].pid, system_call_table.sinfo[i].name);
         print_time(i);
         cprintf("\n");
@@ -607,7 +607,7 @@ log_syscalls()
 {
   for(int i=0;i<recorded_sc;i++)
   {
-    cprintf("pid = %d,\tname: %s\ttime: ",
+    cprintf("pid = %d\t%s\t",
     system_call_table.sinfo[i].pid, system_call_table.sinfo[i].name);
     print_time(i);
     cprintf("\n");
