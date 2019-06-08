@@ -7,6 +7,7 @@
 #include "proc.h"
 #include "spinlock.h"
 #include "date.h"
+#include "get_name_of_scall.c"
 
 struct {
   struct spinlock lock;
@@ -26,8 +27,14 @@ struct {
 
 int recorded_sc = 0;
 
+void init_system_call_count(int *sys_count)
+{
+  for(int i=0;i<MAXSYSCALLS;i++)
+    sys_count[i]=0;
+}
+
 void
-record_system_call(int pid,char* name)
+record_system_call(int pid,char* name,int id)
 {
   struct rtcdate date;
   cmostime(&date);
@@ -35,6 +42,14 @@ record_system_call(int pid,char* name)
   system_call_table.sinfo[recorded_sc].pid = pid;
   system_call_table.sinfo[recorded_sc].date = date;
   system_call_table.sinfo[recorded_sc].name = name;
+  for(int i=0;i<NPROC;i++)
+  {
+    if(ptable.proc[i].pid==pid)
+    {
+      ptable.proc[i].system_call_count[id]++;
+      break;
+    }
+  }
   recorded_sc++;
   if(recorded_sc >= MAXSYSCALLS)
   {
@@ -121,6 +136,7 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
+  init_system_call_count(p->system_call_count);
 
   release(&ptable.lock);
 
@@ -584,7 +600,6 @@ invoked_syscalls(int pid)
     cprintf("there is no process with this pid!\n");
   else
   {
-    int count = 0;
     for(int i=0;i<recorded_sc;i++)
     {
       if(pid==system_call_table.sinfo[i].pid)
@@ -593,10 +608,19 @@ invoked_syscalls(int pid)
           system_call_table.sinfo[i].pid, system_call_table.sinfo[i].name);
         print_time(i);
         cprintf("\n");
-        count++;
       }
     }
-    cprintf("count = %d ",count);
+    for(int i=0;i<NPROC;i++)
+    {
+      if(ptable.proc[i].pid==pid)
+      {
+        for(int m=0;m<SYSCALLNUM;m++)
+        {
+          if(ptable.proc[i].system_call_count[m] > 0)
+            cprintf("%s\tcount %d\n", getName(m),ptable.proc[i].system_call_count[m]);
+        }
+      }
+    }
   }
   
   return 22;
