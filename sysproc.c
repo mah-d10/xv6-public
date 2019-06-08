@@ -93,5 +93,7 @@ sys_uptime(void)
 int
 sys_invoked_syscalls(void)
 {
-  return invoked_syscalls();
+  int pid;
+  argint(0, &pid);
+  return invoked_syscalls(pid);
 }

@@ -535,8 +535,8 @@ procdump(void)
 
 
 int
-invoked_syscalls(void)
+invoked_syscalls(int pid)
 {
-  cprintf("invoked_syscalls called!\n");
+  cprintf("invoked_syscalls called with %d!\n", pid);
   return 22;
 }
