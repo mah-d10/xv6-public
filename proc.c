@@ -6,11 +6,43 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
+#include "date.h"
 
 struct {
   struct spinlock lock;
   struct proc proc[NPROC];
 } ptable;
+
+struct system_call{
+  char* name;
+  int pid;
+  struct rtcdate date;
+};
+
+struct {
+  struct spinlock lock;
+  struct system_call sinfo[MAXSYSCALLS];
+} system_call_table;
+
+int recorded_sc = 0;
+
+void
+record_system_call(int pid,char* name)
+{
+  struct rtcdate date;
+  cmostime(&date);
+  acquire(&system_call_table.lock);
+  system_call_table.sinfo[recorded_sc].pid = pid;
+  system_call_table.sinfo[recorded_sc].date = date;
+  system_call_table.sinfo[recorded_sc].name = name;
+  recorded_sc++;
+  if(recorded_sc >= MAXSYSCALLS)
+  {
+    cprintf("maximum system calls has been reached!");
+  }
+  release(&system_call_table.lock);
+  return;
+}
 
 static struct proc *initproc;
 
@@ -24,6 +56,7 @@ void
 pinit(void)
 {
   initlock(&ptable.lock, "ptable");
+  initlock(&system_call_table.lock, "system_call_table");
 }
 
 // Must be called with interrupts disabled
@@ -533,10 +566,39 @@ procdump(void)
   }
 }
 
+void print_time(int i)
+{
+  cprintf("%d:", system_call_table.sinfo[i].date.year);
+  cprintf(" - %d", system_call_table.sinfo[i].date.month);
+  cprintf(" - %d", system_call_table.sinfo[i].date.day);
+  cprintf(" - %d",system_call_table.sinfo[i].date.hour);
+  cprintf(" - %d",system_call_table.sinfo[i].date.minute);
+  cprintf(" - %d",system_call_table.sinfo[i].date.second);
+}
+
 
 int
 invoked_syscalls(int pid)
 {
-  cprintf("invoked_syscalls called with %d!\n", pid);
+  if(pid<1 || pid>=nextpid)
+    cprintf("there is no process with this pid!\n");
+  else
+  {
+    int count = 0;
+    for(int i=0;i<recorded_sc;i++)
+    {
+      if(pid==system_call_table.sinfo[i].pid)
+      {
+        cprintf("pid = %d,\tname: %s\ttime: ",
+          system_call_table.sinfo[i].pid, system_call_table.sinfo[i].name);
+        print_time(i);
+        cprintf("\n");
+        count++;
+      }
+    }
+    cprintf("count = %d ",count);
+  }
+  
   return 22;
 }
+
