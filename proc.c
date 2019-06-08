@@ -602,3 +602,15 @@ invoked_syscalls(int pid)
   return 22;
 }
 
+int
+log_syscalls()
+{
+  for(int i=0;i<recorded_sc;i++)
+  {
+    cprintf("pid = %d,\tname: %s\ttime: ",
+    system_call_table.sinfo[i].pid, system_call_table.sinfo[i].name);
+    print_time(i);
+    cprintf("\n");
+  }
+  return 23;
+}

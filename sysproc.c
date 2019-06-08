@@ -97,3 +97,9 @@ sys_invoked_syscalls(void)
   argint(0, &pid);
   return invoked_syscalls(pid);
 }
+
+int
+sys_log_syscalls(void)
+{
+  return log_syscalls();
+}
