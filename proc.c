@@ -18,6 +18,8 @@ struct system_call{
   char* name;
   int pid;
   struct rtcdate date;
+  char ** args;
+  int arg_count;
 };
 
 struct {
@@ -34,7 +36,7 @@ void init_system_call_count(int *sys_count)
 }
 
 void
-record_system_call(int pid,char* name,int id)
+record_system_call(int pid,char* name,int id, char* args[10], int* arg_count)
 {
   struct rtcdate date;
   cmostime(&date);
@@ -42,6 +44,9 @@ record_system_call(int pid,char* name,int id)
   system_call_table.sinfo[recorded_sc].pid = pid;
   system_call_table.sinfo[recorded_sc].date = date;
   system_call_table.sinfo[recorded_sc].name = name;
+  system_call_table.sinfo[recorded_sc].args = args;
+  system_call_table.sinfo[recorded_sc].arg_count = *arg_count;
+  
   for(int i=0;i<NPROC;i++)
   {
     if(ptable.proc[i].pid==pid)
@@ -592,6 +597,13 @@ void print_time(int i)
   cprintf(":%d",system_call_table.sinfo[i].date.second);
 }
 
+void print_args(int i)
+{
+  for(int j=0;j<system_call_table.sinfo[i].arg_count;j++)
+    cprintf("%s ", system_call_table.sinfo[i].args[j]);
+  cprintf("\n");
+}
+
 
 int
 invoked_syscalls(int pid)
@@ -606,6 +618,7 @@ invoked_syscalls(int pid)
       {
         cprintf("pid = %d\t%s\t",
           system_call_table.sinfo[i].pid, system_call_table.sinfo[i].name);
+        print_args(i);
         print_time(i);
         cprintf("\n");
       }
@@ -633,6 +646,7 @@ log_syscalls()
   {
     cprintf("pid = %d\t%s\t",
     system_call_table.sinfo[i].pid, system_call_table.sinfo[i].name);
+    print_args(i);
     print_time(i);
     cprintf("\n");
   }
