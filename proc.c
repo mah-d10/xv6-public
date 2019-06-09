@@ -18,7 +18,7 @@ struct system_call{
   char* name;
   int pid;
   struct rtcdate date;
-  char ** args;
+  char args[10][10];
   int arg_count;
 };
 
@@ -35,8 +35,24 @@ void init_system_call_count(int *sys_count)
     sys_count[i]=0;
 }
 
+void init_arg_count()
+{
+  for(int i=0;i<SYSCALLNUM;i++)
+    system_call_table.sinfo[i].arg_count = 0;
+}
+
 void
-record_system_call(int pid,char* name,int id, char* args[10], int* arg_count)
+set_last_system_call_args(char* s)
+{
+  acquire(&system_call_table.lock);
+  for(int i=0;i<10 && s[i]!='\0' ; i++)
+    system_call_table.sinfo[recorded_sc].args[system_call_table.sinfo[recorded_sc].arg_count][i] = s[i];
+  system_call_table.sinfo[recorded_sc].arg_count++;
+  release(&system_call_table.lock);
+}
+
+void
+record_system_call(int pid,char* name,int id)
 {
   struct rtcdate date;
   cmostime(&date);
@@ -44,8 +60,6 @@ record_system_call(int pid,char* name,int id, char* args[10], int* arg_count)
   system_call_table.sinfo[recorded_sc].pid = pid;
   system_call_table.sinfo[recorded_sc].date = date;
   system_call_table.sinfo[recorded_sc].name = name;
-  system_call_table.sinfo[recorded_sc].args = args;
-  system_call_table.sinfo[recorded_sc].arg_count = *arg_count;
   
   for(int i=0;i<NPROC;i++)
   {
@@ -77,6 +91,7 @@ pinit(void)
 {
   initlock(&ptable.lock, "ptable");
   initlock(&system_call_table.lock, "system_call_table");
+  init_arg_count();
 }
 
 // Must be called with interrupts disabled

@@ -122,8 +122,9 @@ void            wakeup(void*);
 void            yield(void);
 int             invoked_syscalls(int);
 int             log_syscalls();
-void            record_system_call(int, char*, int, char*[10], int*);
+void            record_system_call(int, char*, int);
 char*           getName(int);
+void            set_last_system_call_args(char*);
 
 // swtch.S
 void            swtch(struct context**, struct context*);

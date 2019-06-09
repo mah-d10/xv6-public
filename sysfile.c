@@ -16,8 +16,32 @@
 #include "file.h"
 #include "fcntl.h"
 
+
+char global[10] = "mahdi1234";
 // Fetch the nth word-sized system call argument as a file descriptor
 // and return both the descriptor and the corresponding struct file.
+
+void 
+itoa(char* string, int num)
+{
+  int index=0;
+  char temp;
+  while (num>0)
+  {
+    string[index] = num%10 + '0';
+    num/=10;
+    index++;
+  }
+  string[index]='\0';
+  for(int i=0 ; i<index/2 ; i++)
+  {
+    temp = string[i];
+    string[i] = string[index - i - 1];
+    string[index - i -1] = temp;
+  }
+  return;
+}
+
 static int
 argfd(int n, int *pfd, struct file **pf)
 {
@@ -75,6 +99,14 @@ sys_read(void)
 
   if(argfd(0, 0, &f) < 0 || argint(2, &n) < 0 || argptr(1, &p, n) < 0)
     return -1;
+
+  set_last_system_call_args("fd: ");
+  set_last_system_call_args("Inode");
+  set_last_system_call_args("ptr:" );
+  set_last_system_call_args((char*)p);
+  set_last_system_call_args("int: ");
+  itoa(global, n);
+  set_last_system_call_args(global);
   return fileread(f, p, n);
 }
 
