@@ -8,7 +8,7 @@
 #include "spinlock.h"
 #include "date.h"
 #include "get_name_of_scall.c"
-#include "rand.h"
+#include "rand.c"
 
 struct {
   struct spinlock lock;
