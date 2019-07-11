@@ -417,32 +417,12 @@ scheduler(void)
     // Enable interrupts on this processor.
     sti();
 
-    int total_tickets = 0;
-
-     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
-        if(p->state==RUNNABLE){
-          total_tickets += p->tickets;
-        }
-     }
-
-      
-    int winner = 0;
-    winner = random_at_most(total_tickets);
-
-    int passed = 0;
-
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
-    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-    {
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state != RUNNABLE)
         continue;
 
-      if ((passed + p->tickets) < winner)
-      {
-          passed += p->tickets;
-          continue;
-      }
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
@@ -455,7 +435,7 @@ scheduler(void)
         p->response_time = ticks - p->creation_time;
         p->first_service = 0;
       }
-      
+
       swtch(&(c->scheduler), p->context);
       switchkvm();
 
