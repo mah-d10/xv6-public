@@ -182,6 +182,14 @@ found:
   memset(p->context, 0, sizeof *p->context);
   p->context->eip = (uint)forkret;
   p->tickets = 10;
+
+  uint cur_ticks;
+  acquire(&tickslock);
+  cur_ticks = ticks;
+  release(&tickslock);
+
+  p->creation_time = cur_ticks;
+  p->first_service = 0;
   return p;
 }
 
@@ -333,6 +341,13 @@ exit(void)
 
   // Jump into the scheduler, never to return.
   curproc->state = ZOMBIE;
+
+  uint cur_ticks;
+  acquire(&tickslock);
+  cur_ticks = ticks;
+  release(&tickslock);
+  cprintf("pid: %d turnaround time: %d\n", curproc->pid, cur_ticks - curproc->creation_time);
+
   sched();
   panic("zombie exit");
 }
@@ -421,7 +436,8 @@ scheduler(void)
       if(p->state != RUNNABLE)
         continue;
 
-      if ((passed + p->tickets) < winner){
+      if ((passed + p->tickets) < winner)
+      {
           passed += p->tickets;
           continue;
       }

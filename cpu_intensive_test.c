@@ -17,6 +17,11 @@ int main(int argc, char const* argv[])
         }
         if (id > 0)
         {
+            while (wait() <= 0)
+            {
+                /* code */
+            }
+            
             printf(1, "Parent %d creating child %d!\n", getpid(), id);
             for (z = 0; z < 100000; z++) 
             {
