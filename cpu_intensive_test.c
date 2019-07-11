@@ -5,35 +5,34 @@
 
 int main(int argc, char const* argv[])
 {
-    int k, n = 4, id;
-    double x=0, z;
+    int n = 6;
 
-
-    for (k=0; k <n; k++) 
+    for (int i = 0; i < n; i++) 
     {
-        id = fork();
-        if (id < 0) {
+        double res = 0;
+        int rc = fork();
+        if (rc < 0) 
+        {
             printf(1, "%d failed in fork!\n", getpid());
         }
-        if (id > 0)
+        if (rc > 0)
         {
             while (wait() <= 0)
             {
-                /* code */
             }
             
-            printf(1, "Parent %d creating child %d!\n", getpid(), id);
-            for (z = 0; z < 100000; z++) 
+            printf(1, "parent %d creating child %d!\n", getpid(), rc);
+            for (int k = 0; k < 100000; k++) 
             {
-                x = x * 69 * 69;
+                res = res * 69 * 69;
             }
         } 
-        if(id == 0) 
+        if(rc == 0) 
         {
-            printf(1, "Child %d created\n", getpid());
-            for (z = 0; z < 100000; z++)
+            printf(1, "child %d created\n", getpid());
+            for (int k = 0; k < 100000; k++)
             {
-                x = x * 0.1 * 0.2;
+                res = res * 0.1 * 0.2;
             }
             break;
         }

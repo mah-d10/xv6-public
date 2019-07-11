@@ -6,29 +6,44 @@
 
 int main(int argc, char const *argv[])
 {
-    int k, n=4, id;
+    int n = 6;
 
-    for (k=0; k <n; k++) {
-        id = fork();
-        if (id < 0)
+    for (int i=0; i < n; i++) {
+        int rc = fork();
+        if (rc < 0)
         {
             printf(1, "failed in fork!\n");
         }
-        else if (id > 0) 
+        if (rc > 0) 
         {
-            printf(1, "Parent");
-        }
-        else 
-        { 
-            // printf(1, "Child %d created\n", getpid());
+            while (wait() <= 0)
+            {
+            }
+
+            printf(1, "parent %d creating child %d!\n", getpid(), rc);
             int fd;
-            char *buffer = "1234567890123456";
+            char *buffer = "123456789";
             for (int i=0; i < 100; i++) 
             {
-                char* file_name = (char*)malloc(20 * sizeof(char));
-                file_name[0] = id;
-                fd = open(file_name, O_WRONLY);
-                write (fd, buffer, 16);
+                char* file = (char*)malloc(15 * sizeof(char));
+                file[0] = rc;
+                fd = open(file, O_WRONLY);
+                write (fd, buffer, 10);
+                close (fd);
+            }
+
+        }
+        if(rc == 0) 
+        { 
+            printf(1, "Child %d created\n", getpid());
+            int fd;
+            char *buffer = "123456789";
+            for (int i=0; i < 100; i++) 
+            {
+                char* file = (char*)malloc(15 * sizeof(char));
+                file[0] = rc;
+                fd = open(file, O_WRONLY);
+                write (fd, buffer, 10);
                 close (fd);
             }
             break;
