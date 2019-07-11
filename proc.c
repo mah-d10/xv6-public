@@ -189,7 +189,7 @@ found:
   release(&tickslock);
 
   p->creation_time = cur_ticks;
-  p->first_service = 0;
+  p->first_service = 1;
   return p;
 }
 
@@ -346,7 +346,9 @@ exit(void)
   acquire(&tickslock);
   cur_ticks = ticks;
   release(&tickslock);
+
   cprintf("pid: %d turnaround time: %d\n", curproc->pid, cur_ticks - curproc->creation_time);
+  cprintf("pid: %d response time: %d\n", curproc->pid, curproc->response_time);
 
   sched();
   panic("zombie exit");
@@ -448,6 +450,12 @@ scheduler(void)
       switchuvm(p);
       p->state = RUNNING;
 
+      if(p->first_service == 1)
+      {
+        p->response_time = ticks - p->creation_time;
+        p->first_service = 0;
+      }
+      
       swtch(&(c->scheduler), p->context);
       switchkvm();
 

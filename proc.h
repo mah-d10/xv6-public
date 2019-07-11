@@ -52,7 +52,7 @@ struct proc {
   int system_call_count[SYSCALLNUM];
   int tickets;
   uint creation_time;
-  uint done_time;
+  uint response_time;
   int first_service;
 };
 
